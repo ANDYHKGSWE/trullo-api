@@ -37,3 +37,17 @@ mongoose
 	.catch((error) => {
 		console.error('Connection error', error);
 	});
+
+// Testväg för att verifiera databasanslutning
+const testSchema = new mongoose.Schema({ name: String });
+const TestModel = mongoose.model('Test', testSchema);
+
+app.get('/test-db', async (req, res) => {
+	try {
+		const testDoc = new TestModel({ name: 'Test Document' });
+		await testDoc.save();
+		res.status(200).send(testDoc);
+	} catch (error) {
+		res.status(500).send('Error connecting to the database');
+	}
+});
