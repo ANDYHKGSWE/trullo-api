@@ -1,10 +1,10 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import taskRoutes from './routes/taskRoutes';
-import dotenv from 'dotenv';
 import projectRoutes from './routes/projectRoutes';
-import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 

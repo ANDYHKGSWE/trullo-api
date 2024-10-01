@@ -36,6 +36,7 @@ router.post(
 			);
 			res.status(201).send({ user, token });
 		} catch (error) {
+			console.error('Error during user registration:', error); // Logga felet
 			res.status(500).send({ error: 'Server error' });
 		}
 	}
@@ -65,6 +66,7 @@ router.post(
 			);
 			res.send({ user, token });
 		} catch (error) {
+			console.error('Error during user login:', error); // Logga felet
 			res.status(500).send({ error: 'Server error' });
 		}
 	}
@@ -72,7 +74,12 @@ router.post(
 
 // Hämta användarens profil
 router.get('/me', auth, async (req: AuthenticatedRequest, res: Response) => {
-	res.send(req.user);
+	try {
+		res.send(req.user);
+	} catch (error) {
+		console.error('Error fetching user profile:', error); // Logga felet
+		res.status(500).send({ error: 'Server error' });
+	}
 });
 
 // Begär en återställningslänk för lösenord
@@ -119,6 +126,7 @@ router.post(
 
 			res.send({ message: 'Password reset link sent' });
 		} catch (error) {
+			console.error('Error during password reset request:', error); // Logga felet
 			res.status(500).send({ error: 'Server error' });
 		}
 	}
@@ -151,6 +159,7 @@ router.post(
 
 			res.send({ message: 'Password has been reset' });
 		} catch (error) {
+			console.error('Error during password reset:', error); // Logga felet
 			res.status(500).send({ error: 'Server error' });
 		}
 	}
