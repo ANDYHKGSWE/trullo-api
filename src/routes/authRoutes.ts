@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/user';
 import auth from '../middleware/auth';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 const router = Router();
 
@@ -67,5 +69,86 @@ router.post(
 router.get('/me', auth, async (req, res) => {
 	res.send(req.user);
 });
+
+// Begär en återställningslänk för lösenord
+router.post(
+	'/forgot-password',
+	[body('email').isEmail().withMessage('Valid email is required')],
+	async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+
+		try {
+			const user = await User.findOne({ email: req.body.email });
+			if (!user) {
+				return res.status(400).send({ error: 'User not found' });
+			}
+
+			const resetToken = crypto.randomBytes(32).toString('hex');
+			const resetTokenHash = await bcrypt.hash(resetToken, 10);
+			user.resetPasswordToken = resetTokenHash;
+			user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+			await user.save();
+
+			const transporter = nodemailer.createTransport({
+				service: 'gmail',
+				auth: {
+					user: process.env.EMAIL,
+					pass: process.env.EMAIL_PASSWORD,
+				},
+			});
+
+			const mailOptions = {
+				to: user.email,
+				from: process.env.EMAIL,
+				subject: 'Password Reset',
+				text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
+                Please click on the following link, or paste this into your browser to complete the process:\n\n
+                http://${req.headers.host}/reset-password/${resetToken}\n\n
+                If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+			};
+
+			await transporter.sendMail(mailOptions);
+
+			res.send({ message: 'Password reset link sent' });
+		} catch (error) {
+			res.status(500).send({ error: 'Server error' });
+		}
+	}
+);
+
+// Återställ lösenord
+router.post(
+	'/reset-password/:token',
+	[body('password').notEmpty().withMessage('Password is required')],
+	async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+
+		try {
+			const user = await User.findOne({
+				resetPasswordToken: req.params.token,
+				resetPasswordExpires: { $gt: Date.now() },
+			});
+
+			if (!user) {
+				return res.status(400).send({ error: 'Invalid or expired token' });
+			}
+
+			user.password = req.body.password;
+			user.resetPasswordToken = undefined;
+			user.resetPasswordExpires = undefined;
+			await user.save();
+
+			res.send({ message: 'Password has been reset' });
+		} catch (error) {
+			res.status(500).send({ error: 'Server error' });
+		}
+	}
+);
 
 export default router;
