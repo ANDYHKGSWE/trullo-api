@@ -18,7 +18,8 @@ interface AuthenticatedRequest extends Request {
 router.post(
 	'/register',
 	[
-		body('username').notEmpty().withMessage('Username is required'),
+		body('name').notEmpty().withMessage('Name is required'),
+		body('email').isEmail().withMessage('Valid email is required'),
 		body('password').notEmpty().withMessage('Password is required'),
 	],
 	async (req: Request, res: Response) => {
@@ -28,7 +29,8 @@ router.post(
 		}
 
 		try {
-			const user = new User(req.body);
+			const { name, email, password } = req.body;
+			const user = new User({ name, email, password });
 			await user.save();
 			const token = jwt.sign(
 				{ _id: user._id, role: user.role },
@@ -46,7 +48,7 @@ router.post(
 router.post(
 	'/login',
 	[
-		body('username').notEmpty().withMessage('Username is required'),
+		body('email').isEmail().withMessage('Valid email is required'),
 		body('password').notEmpty().withMessage('Password is required'),
 	],
 	async (req: Request, res: Response) => {
@@ -56,7 +58,7 @@ router.post(
 		}
 
 		try {
-			const user = await User.findOne({ username: req.body.username });
+			const user = await User.findOne({ email: req.body.email });
 			if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
 				return res.status(400).send({ error: 'Invalid credentials' });
 			}
