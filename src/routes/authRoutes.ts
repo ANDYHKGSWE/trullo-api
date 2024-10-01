@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import User from '../models/user';
+import { User } from '../models/user';
 import auth from '../middleware/auth';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
@@ -16,7 +16,7 @@ router.post(
 		body('username').notEmpty().withMessage('Username is required'),
 		body('password').notEmpty().withMessage('Password is required'),
 	],
-	async (req, res) => {
+	async (req: Request, res: Response) => {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ errors: errors.array() });
@@ -43,7 +43,7 @@ router.post(
 		body('username').notEmpty().withMessage('Username is required'),
 		body('password').notEmpty().withMessage('Password is required'),
 	],
-	async (req, res) => {
+	async (req: Request, res: Response) => {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ errors: errors.array() });
@@ -66,7 +66,7 @@ router.post(
 );
 
 // Hämta användarens profil
-router.get('/me', auth, async (req, res) => {
+router.get('/me', auth, async (req: Request, res: Response) => {
 	res.send(req.user);
 });
 
@@ -74,7 +74,7 @@ router.get('/me', auth, async (req, res) => {
 router.post(
 	'/forgot-password',
 	[body('email').isEmail().withMessage('Valid email is required')],
-	async (req, res) => {
+	async (req: Request, res: Response) => {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ errors: errors.array() });
@@ -123,7 +123,7 @@ router.post(
 router.post(
 	'/reset-password/:token',
 	[body('password').notEmpty().withMessage('Password is required')],
-	async (req, res) => {
+	async (req: Request, res: Response) => {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ errors: errors.array() });
