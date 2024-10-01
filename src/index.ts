@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import taskRoutes from './routes/taskRoutes';
 import dotenv from 'dotenv';
+import projectRoutes from './routes/projectRoutes';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
+app.use('/projects', projectRoutes);
 app.use('/users', userRoutes);
 app.use('/tasks', taskRoutes);
 
