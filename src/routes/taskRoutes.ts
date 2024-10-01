@@ -1,11 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import {
-	createTask,
-	getTasks,
-	updateTask,
-	deleteTask,
-} from '../controllers/taskController';
+import Task from '../models/task';
 import auth from '../middleware/auth';
 
 const router = Router();
