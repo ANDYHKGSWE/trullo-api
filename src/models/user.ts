@@ -6,6 +6,8 @@ interface IUser extends Document {
 	email: string;
 	password: string;
 	role: string;
+	resetPasswordToken?: string;
+	resetPasswordExpires?: number;
 	comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -14,6 +16,8 @@ const userSchema = new Schema<IUser>({
 	email: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
 	role: { type: String, enum: ['user', 'admin'], default: 'user' },
+	resetPasswordToken: { type: String },
+	resetPasswordExpires: { type: Number },
 });
 
 // Hash the password before saving the user
