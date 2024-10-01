@@ -1,14 +1,15 @@
 {
-  "compilerOptions": {
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "target": "ES6",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types", "./src/types"]
-  },
-  "include": ["src/**/*", "src/types.d.ts"]
+	"compilerOptions": {
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"target": "ES6",
+		"module": "commonjs",
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"strict": true,
+		"skipLibCheck": true,
+		"typeRoots": ["./node_modules/@types", "./src/types"],
+		"forceConsistentCasingInFileNames": true
+	},
+	"include": ["src/**/*", "src/types.d.ts"]
 }
