@@ -9,6 +9,11 @@ import nodemailer from 'nodemailer';
 
 const router = Router();
 
+// Utöka Request-typen för att inkludera user
+interface AuthenticatedRequest extends Request {
+	user?: any;
+}
+
 // Registrera en ny användare
 router.post(
 	'/register',
@@ -66,7 +71,7 @@ router.post(
 );
 
 // Hämta användarens profil
-router.get('/me', auth, async (req: Request, res: Response) => {
+router.get('/me', auth, async (req: AuthenticatedRequest, res: Response) => {
 	res.send(req.user);
 });
 
