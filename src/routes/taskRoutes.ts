@@ -1,96 +1,95 @@
-import { Router } from 'express';
-import { body, validationResult } from 'express-validator';
+import { Router, Request, Response } from 'express';
 import Task from '../models/task';
+import auth from '../middleware/auth';
 
 const router = Router();
 
-// Skapa en ny uppgift med validering
-router.post(
-	'/',
-	[
-		body('title').notEmpty().withMessage('Title is required'),
-		body('description').notEmpty().withMessage('Description is required'),
-	],
-	async (req, res) => {
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({ errors: errors.array() });
-		}
-
-		try {
-			const task = new Task(req.body);
-			await task.save();
-			res.status(201).send(task);
-		} catch (error) {
-			res.status(500).send({ error: 'Server error' });
-		}
+// Skapa en ny uppgift
+router.post('/', auth, async (req: Request, res: Response) => {
+	try {
+		const task = new Task({
+			...req.body,
+			owner: req.user._id,
+		});
+		await task.save();
+		res.status(201).send(task);
+	} catch (error) {
+		res.status(400).send(error);
 	}
-);
+});
 
 // Hämta alla uppgifter
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req: Request, res: Response) => {
 	try {
-		const tasks = await Task.find();
-		res.status(200).send(tasks);
+		const tasks = await Task.find({ owner: req.user._id });
+		res.send(tasks);
 	} catch (error) {
-		res.status(500).send({ error: 'Server error' });
+		res.status(500).send(error);
 	}
 });
 
 // Hämta en specifik uppgift
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req: Request, res: Response) => {
+	const _id = req.params.id;
+
 	try {
-		const task = await Task.findById(req.params.id);
+		const task = await Task.findOne({ _id, owner: req.user._id });
+
 		if (!task) {
-			return res.status(404).send({ error: 'Task not found' });
+			return res.status(404).send();
 		}
-		res.status(200).send(task);
+
+		res.send(task);
 	} catch (error) {
-		res.status(500).send({ error: 'Server error' });
+		res.status(500).send(error);
 	}
 });
 
-// Uppdatera en uppgift med validering
-router.patch(
-	'/:id',
-	[
-		body('title').optional().notEmpty().withMessage('Title cannot be empty'),
-		body('description')
-			.optional()
-			.notEmpty()
-			.withMessage('Description cannot be empty'),
-	],
-	async (req, res) => {
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({ errors: errors.array() });
+// Uppdatera en uppgift
+router.patch('/:id', auth, async (req: Request, res: Response) => {
+	const updates = Object.keys(req.body);
+	const allowedUpdates = ['description', 'completed'];
+	const isValidOperation = updates.every((update) =>
+		allowedUpdates.includes(update)
+	);
+
+	if (!isValidOperation) {
+		return res.status(400).send({ error: 'Invalid updates!' });
+	}
+
+	try {
+		const task = await Task.findOne({
+			_id: req.params.id,
+			owner: req.user._id,
+		});
+
+		if (!task) {
+			return res.status(404).send();
 		}
 
-		try {
-			const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
-				new: true,
-				runValidators: true,
-			});
-			if (!task) {
-				return res.status(404).send({ error: 'Task not found' });
-			}
-			res.status(200).send(task);
-		} catch (error) {
-			res.status(500).send({ error: 'Server error' });
-		}
+		updates.forEach((update) => (task[update] = req.body[update]));
+		await task.save();
+		res.send(task);
+	} catch (error) {
+		res.status(400).send(error);
 	}
-);
+});
 
 // Ta bort en uppgift
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req: Request, res: Response) => {
 	try {
-		const task = await Task.findByIdAndDelete(req.params.id);
+		const task = await Task.findOneAndDelete({
+			_id: req.params.id,
+			owner: req.user._id,
+		});
+
 		if (!task) {
-			return res.status(404).send({ error: 'Task not found' });
+			return res.status(404).send();
 		}
-		res.status(200).send(task);
+
+		res.send(task);
 	} catch (error) {
-		res.status(500).send({ error: 'Server error' });
+		res.status(500).send(error);
 	}
 });
 
