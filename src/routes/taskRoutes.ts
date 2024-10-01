@@ -67,7 +67,11 @@ router.patch('/:id', auth, async (req: Request, res: Response) => {
 			return res.status(404).send();
 		}
 
-		updates.forEach((update) => (task[update] = req.body[update]));
+		updates.forEach((update) => {
+			if (update in task) {
+				(task as any)[update] = req.body[update];
+			}
+		});
 		await task.save();
 		res.send(task);
 	} catch (error) {

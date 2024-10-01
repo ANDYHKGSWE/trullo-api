@@ -1,6 +1,6 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import Project from '../models/project';
+import Project from '../models/project'; // Kontrollera att denna fil finns och är korrekt exporterad
 
 const router = Router();
 
@@ -11,7 +11,7 @@ router.post(
 		body('name').notEmpty().withMessage('Name is required'),
 		body('description').notEmpty().withMessage('Description is required'),
 	],
-	async (req, res) => {
+	async (req: Request, res: Response) => {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ errors: errors.array() });
@@ -28,7 +28,7 @@ router.post(
 );
 
 // Hämta alla projekt
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
 		const projects = await Project.find();
 		res.status(200).send(projects);
@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 // Hämta ett specifikt projekt
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
 	try {
 		const project = await Project.findById(req.params.id);
 		if (!project) {
@@ -60,7 +60,7 @@ router.patch(
 			.notEmpty()
 			.withMessage('Description cannot be empty'),
 	],
-	async (req, res) => {
+	async (req: Request, res: Response) => {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ errors: errors.array() });
@@ -82,7 +82,7 @@ router.patch(
 );
 
 // Ta bort ett projekt
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
 	try {
 		const project = await Project.findByIdAndDelete(req.params.id);
 		if (!project) {
