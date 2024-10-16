@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Task, { ITask } from "../models/task.model";
-import Project from "../models/project.model"; // Import the Project model
+import Project from "../models/project.model"; 
 
 export const createTask = async (req: Request, res: Response): Promise<void> => {
     try {

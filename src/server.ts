@@ -5,7 +5,6 @@ import taskRoutes from "./routes/task.routes";
 import userRoutes from "./routes/user.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
-// Import all models to ensure they are registered with Mongoose
 import "./models/user.model";
 import "./models/task.model";
 import "./models/project.model";

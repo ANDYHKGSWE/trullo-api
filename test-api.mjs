@@ -31,10 +31,9 @@ const registerUser = () => {
       console.log(`REGISTER RESPONSE: ${responseBody}`);
       if (res.statusCode === 201) {
         const response = JSON.parse(responseBody);
-        userId = response[0]._id; // Capture the user ID for task assignment
+        userId = response[0]._id; 
         loginUser();
       } else {
-        // If user already exists, attempt to login
         loginUser();
       }
     });
@@ -75,7 +74,7 @@ const loginUser = () => {
       console.log(`LOGIN RESPONSE: ${responseBody}`);
       const response = JSON.parse(responseBody);
       authToken = response.token;
-      // Fetch user ID if not already set
+      
       if (!userId) {
         fetchUserId();
       } else {
@@ -132,7 +131,7 @@ const createTask = () => {
     title: "Test Task",
     description: "This is a test task",
     status: "To Do",
-    assignedTo: userId // Use the captured user ID
+    assignedTo: userId 
   });
 
   const options = {
@@ -196,5 +195,4 @@ const getAllTasks = () => {
   req.end();
 };
 
-// Start the process by registering a user
 registerUser();
